@@ -32,7 +32,33 @@ func main() {
 		log.Fatal("Unable to create image", err)
 	}
 
-	win.Add(img)
+	// l, err := gtk.LabelNew("Hello, gotk3!")
+	// if err != nil {
+	// 	log.Fatal("Unable to create label:", err)
+	// }
+	// button, err := gtk.ButtonNewWithLabel("Click me")
+	// if err != nil {
+	// 	log.Fatal("Unable to create button", err)
+	// }
+
+	menuBar, err := gtk.MenuBarNew()
+	if err != nil {
+		log.Fatal("Unable to create menu bar", err)
+	}
+
+	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 10)
+	if err != nil {
+		log.Fatal("Unable to create box", err)
+	}
+
+	// button.Connect("clicked", func() {
+	// 	log.Print("Clicked")
+	// })
+
+	box.Add(menuBar)
+	box.Add(img)
+
+	win.Add(box)
 
 	// Set the default window size.
 	win.SetDefaultSize(400, 400)
