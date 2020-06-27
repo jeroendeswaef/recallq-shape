@@ -33,9 +33,10 @@ func main() {
 		// Map the handlers to callback functions, and connect the signals
 		// to the Builder.
 		signals := map[string]interface{}{
-			"on_main_window_destroy":     onMainWindowDestroy,
-			"on_button_clicked":          onChooseBackgroundImage,
-			"on_choose_background_image": onChooseBackgroundImage,
+			"on_main_window_destroy":              onMainWindowDestroy,
+			"on_button_clicked":                   onChooseBackgroundImage,
+			"on_choose_background_image":          onChooseBackgroundImage,
+			"on_opacity_adjustment_value_changed": onChangeOpacity,
 		}
 		builder.ConnectSignals(signals)
 
@@ -50,11 +51,6 @@ func main() {
 		// Show the Window and all of its components.
 		win.Show()
 		application.AddWindow(win)
-	})
-
-	// Connect function to application shutdown event, this is not required.
-	application.Connect("shutdown", func() {
-		log.Println("application shutdown")
 	})
 
 	// Launch the application
@@ -106,4 +102,12 @@ func onChooseBackgroundImage() {
 		backgroundStack.SetVisibleChildName("page1")
 	}
 
+}
+
+func onChangeOpacity(adjustment *gtk.Adjustment) {
+	newOpacity := adjustment.GetValue() / 100
+	backgroundImageObj, err := builder.GetObject("background_image")
+	errorCheck(err)
+	backgroundImage := backgroundImageObj.(*gtk.Image)
+	backgroundImage.SetOpacity(newOpacity)
 }
