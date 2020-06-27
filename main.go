@@ -12,6 +12,7 @@ import (
 const appID = "github.com.jeroendeswaef.recallq-shape"
 
 var mainWindow *gtk.Window
+var builder *gtk.Builder
 
 func main() {
 	// Create a new application.
@@ -25,7 +26,7 @@ func main() {
 	// Connect function to application activate event
 	application.Connect("activate", func() {
 		// Get the GtkBuilder UI definition in the glade file.
-		builder, err := gtk.BuilderNew()
+		builder, err = gtk.BuilderNew()
 		builder.AddFromString(string(data))
 		errorCheck(err)
 
@@ -94,12 +95,15 @@ func onChooseBackgroundImage() {
 
 	if gtk.ResponseType(res) == gtk.RESPONSE_ACCEPT {
 		log.Printf("Accept: %s\n", filename)
-	} else {
-		log.Println("Cancel")
-	}
-	// backgroundStackObj, err := builder.GetObject("background_stack")
-	// errorCheck(err)
+		backgroundImageObj, err := builder.GetObject("background_image")
+		errorCheck(err)
+		backgroundImage := backgroundImageObj.(*gtk.Image)
+		backgroundImage.SetFromFile(filename)
+		backgroundStackObj, err := builder.GetObject("background_stack")
+		errorCheck(err)
 
-	// backgroundStack := backgroundStackObj.(*gtk.Stack)
-	// backgroundStack.SetVisibleChildName("page1")
+		backgroundStack := backgroundStackObj.(*gtk.Stack)
+		backgroundStack.SetVisibleChildName("page1")
+	}
+
 }
