@@ -9,38 +9,32 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const appID = "com.github.gotk3.gotk3-examples.glade"
+const appID = "github.com.jeroendeswaef.recallq-shape"
+
+var mainWindow *gtk.Window
 
 func main() {
 	// Create a new application.
 	application, err := gtk.ApplicationNew(appID, glib.APPLICATION_FLAGS_NONE)
 	errorCheck(err)
+	mainWindow = application.GetActiveWindow()
 
 	data, err := Asset("ui/ui.glade")
 	errorCheck(err)
 
 	// Connect function to application activate event
 	application.Connect("activate", func() {
-		log.Println("application activate")
-
 		// Get the GtkBuilder UI definition in the glade file.
 		builder, err := gtk.BuilderNew()
 		builder.AddFromString(string(data))
-		// builder, err := gtk.BuilderNewFromFile("ui/ui.glade")
 		errorCheck(err)
 
 		// Map the handlers to callback functions, and connect the signals
 		// to the Builder.
 		signals := map[string]interface{}{
-			"on_main_window_destroy": onMainWindowDestroy,
-			"on_button_clicked": func() {
-				log.Println("Clicked!")
-				backgroundStackObj, err := builder.GetObject("background_stack")
-				errorCheck(err)
-
-				backgroundStack := backgroundStackObj.(*gtk.Stack)
-				backgroundStack.SetVisibleChildName("page1")
-			},
+			"on_main_window_destroy":     onMainWindowDestroy,
+			"on_button_clicked":          onChooseBackgroundImage,
+			"on_choose_background_image": onChooseBackgroundImage,
 		}
 		builder.ConnectSignals(signals)
 
@@ -81,10 +75,31 @@ func errorCheck(e error) {
 	}
 }
 
-// onMainWindowDestory is the callback that is linked to the
-// on_main_window_destroy handler. It is not required to map this,
-// and is here to simply demo how to hook-up custom callbacks.
 func onMainWindowDestroy() {
-	log.Println("onMainWindowDestroy")
 	os.Exit(0)
+}
+
+func onChooseBackgroundImage() {
+	fileChooserDialog, err := gtk.FileChooserNativeDialogNew("Choose background image", mainWindow, gtk.FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel")
+	errorCheck(err)
+
+	imageFileFilter, err := gtk.FileFilterNew()
+	errorCheck(err)
+
+	imageFileFilter.AddMimeType("image/*")
+	fileChooserDialog.SetFilter(imageFileFilter)
+
+	res := fileChooserDialog.Run()
+	filename := fileChooserDialog.GetFilename()
+
+	if gtk.ResponseType(res) == gtk.RESPONSE_ACCEPT {
+		log.Printf("Accept: %s\n", filename)
+	} else {
+		log.Println("Cancel")
+	}
+	// backgroundStackObj, err := builder.GetObject("background_stack")
+	// errorCheck(err)
+
+	// backgroundStack := backgroundStackObj.(*gtk.Stack)
+	// backgroundStack.SetVisibleChildName("page1")
 }
